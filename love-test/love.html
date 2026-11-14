@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>恋爱幻想种测试 - 鹤与月</title>
+<style>
+  :root {
+	--gold: #d4af37;
+	--silver: #c0c0c0;
+	--bg: #05050a;
+	--glow: rgba(212,175,55,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+	background: radial-gradient(circle at center, #1a0b2e 0%, var(--bg) 100%);
+	color: #eee;
+	font-family: "Microsoft YaHei", "PingFang SC", serif;
+	min-height: 100vh;
+	padding: 20px;
+	text-align: center;
+  }
+  .page { display: none; max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+  .page.active { display: block; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* 封面 */
+  .cover h1 {
+	font-size: 2.8em; margin-bottom: 10px;
+	background: linear-gradient(to right, var(--gold), #fff, var(--gold));
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	letter-spacing: 5px;
+  }
+  .cover p.sub { color: var(--silver); margin-bottom: 15px; letter-spacing: 2px; }
+  .cover p.desc { color: #999; font-size: 0.9em; margin-bottom: 40px; line-height: 1.6; }
+  .btn {
+	background: transparent;
+	border: 1px solid var(--gold);
+	color: var(--gold);
+	padding: 12px 40px;
+	font-size: 1.2em;
+	cursor: pointer;
+	transition: 0.3s;
+	box-shadow: 0 0 15px var(--glow);
+	margin: 10px;
+  }
+  .btn:hover { background: var(--gold); color: #000; }
+
+  /* 进度条 */
+  .progress { width: 100%; height: 4px; background: #222; margin-bottom: 30px; border-radius: 2px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(to right, var(--gold), #fff); width: 0%; transition: 0.3s; }
+
+  /* 题目 */
+  .q-title { font-size: 1.3em; margin-bottom: 30px; line-height: 1.6; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .opt {
+	border: 1px solid #444;
+	padding: 16px;
+	cursor: pointer;
+	transition: 0.2s;
+	text-align: left;
+	background: rgba(255,255,255,0.05);
+	color: #eee;
+	font-size: 1em;
+  }
+  .opt:hover { border-color: var(--gold); background: rgba(212,175,55,0.1); }
+
+  /* 结果页 */
+  .result-img-wrap {
+	width: 220px; height: 220px; margin: 0 auto 20px;
+	border-radius: 50%; overflow: hidden;
+	border: 3px solid var(--gold);
+	box-shadow: 0 0 30px var(--glow);
+  }
+  .result-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .r-name { font-size: 2em; color: var(--gold); margin: 10px 0; }
+  .r-score { font-size: 1.5em; color: #fff; margin-bottom: 20px; }
+  .stars { color: var(--gold); font-size: 1.2em; margin-bottom: 15px; letter-spacing: 3px; }
+  .card {
+	background: rgba(255,255,255,0.05);
+	border: 1px solid #333;
+	padding: 18px; margin: 15px 0;
+	text-align: left; line-height: 1.7;
+  }
+  .card h3 { margin: 0 0 10px; color: var(--gold); }
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 15px 0; }
+  .tag { border: 1px solid var(--silver); padding: 5px 12px; border-radius: 20px; font-size: 0.85em; color: var(--silver); }
+
+  /* 署名 */
+  .signature { margin-top: 40px; padding: 20px; border-top: 1px solid #333; }
+  .sig-name {
+	font-size: 1.8em;
+	background: linear-gradient(to right, var(--gold), #fff);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	letter-spacing: 4px;
+  }
+  .sig-sub { color: var(--silver); font-size: 0.9em; margin-top: 5px; }
+  .footer-tip { color: #666; font-size: 0.8em; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- 封面 -->
+<div class="page cover active" id="p1">
+  <h1>恋爱幻想种</h1>
+  <p class="sub">测测你在恋爱中是哪种幻想种</p>
+  <p class="desc">12道题 · 约2分钟 · 结果仅供参考，纯属娱乐</p>
+  <button class="btn" onclick="showPage('p2')">开启测试</button>
+  <div class="signature">
+	<div class="sig-name">鹤与月</div>
+	<div class="sig-sub">原创 · 恋爱幻想种测试</div>
+  </div>
+</div>
+
+<!-- 题目页由JS生成 -->
+<div id="question-pages"></div>
+
+<!-- 结果页 -->
+<div class="page" id="result">
+  <div class="result-img-wrap">
+	<img id="res-img" src="" alt="幻想种">
+  </div>
+  <div class="r-name" id="res-name"></div>
+  <div class="r-score" id="res-score"></div>
+  <div class="stars" id="res-stars"></div>
+  <div class="tags" id="res-tags"></div>
+  <div class="card">
+	<h3>恋爱人设</h3>
+	<div id="res-desc"></div>
+  </div>
+  <div class="card">
+	<h3>性格剖析</h3>
+	<div id="res-personality"></div>
+  </div>
+  <div class="card">
+	<h3>成因溯源</h3>
+	<div id="res-origin"></div>
+  </div>
+  <button class="btn" onclick="location.reload()">重新测试</button>
+  <div class="signature">
+	<div class="sig-name">鹤与月</div>
+	<div class="sig-sub">原创 · 恋爱幻想种测试</div>
+	<div class="footer-tip">结果仅供参考，纯属娱乐消遣 · 分享给另一半测测相配度</div>
+  </div>
+</div>
+
+<script>
+// ===== 12道恋爱场景题 =====
+// 每题4个选项，分别对应幻想种倾向（A=纯洁系 B=炽烈系 C=自由系 D=深情系）
+const questions = [
+  {
+	q: "1. 恋爱中，你最理想的相处模式是？",
+	a: "A. 彼此独立，灵魂共鸣但保持距离",
+	b: "B. 恨不得24小时黏在一起，形影不离",
+	c: "C. 并肩同行，各自精彩又彼此陪伴",
+	d: "D. 安静陪伴，细水长流默默守护"
+  },
+  {
+	q: "2. 吵架了，你的第一反应通常是？",
+	a: "A. 先冷战，等情绪平复再理性沟通",
+	b: "B. 当场爆发，情绪全开必须立刻说清",
+	c: "C. 需要空间冷静，自己待一会儿",
+	d: "D. 主动低头服软，不想失去对方"
+  },
+  {
+	q: "3. 你在恋爱中最渴望被满足的是？",
+	a: "A. 精神契合，TA懂你的沉默",
+	b: "B. 热烈的爱意，浓到化不开",
+	c: "C. 自由空间，不被束缚",
+	d: "D. 被坚定选择，安全感满满"
+  },
+  {
+	q: "4. 另一半送你礼物，你最想要？",
+	a: "A. 一封手写信，字字走心",
+	b: "B. 一次精心策划的浪漫惊喜",
+	c: "C. 一场说走就走的旅行",
+	d: "D. 一份亲手做的、用了心意的礼物"
+  },
+  {
+	q: "5. 你眼中最浪漫的约会场景是？",
+	a: "A. 深夜天台看星星，安静聊天",
+	b: "B. 盛大烟火下的告白时刻",
+	c: "C. 一起冒险探索新地方",
+	d: "D. 窝在沙发看电影，温馨日常"
+  },
+  {
+	q: "6. 恋爱中你最怕遇到什么？",
+	a: "A. 三观不合，聊不到一起",
+	b: "B. 激情褪去后变得平淡冷淡",
+	c: "C. 被控制、失去自我",
+	d: "D. 被辜负、真心错付"
+  },
+  {
+	q: "7. 当你喜欢上一个人，你会？",
+	a: "A. 暗自观察，慢慢试探",
+	b: "B. 直接出击，大胆表达",
+	c: "C. 若即若离，保持神秘感",
+	d: "D. 默默付出，用行动证明"
+  },
+  {
+	q: "8. 恋爱中你的占有欲程度是？",
+	a: "A. 不强求，但希望彼此忠诚",
+	b: "B. 很强，你是我的就别想跑",
+	c: "C. 不强，彼此信任就够",
+	d: "D. 希望被独占，也愿意独占"
+  },
+  {
+	q: "9. 如果感情出现第三者，你会？",
+	a: "A. 体面退出，不爱了就不纠缠",
+	b: "B. 正面battle，绝不认输",
+	c: "C. 洒脱放手，天涯何处无芳草",
+	d: "D. 难过但选择原谅，再给一次机会"
+  },
+  {
+	q: "10. 你觉得恋爱中最重要的是？",
+	a: "A. 精神共鸣与思想交流",
+	b: "B. 心动的感觉与激情",
+	c: "C. 彼此尊重各自的独立空间",
+	d: "D. 长久陪伴与相互依靠"
+  },
+  {
+	q: "11. 你理想中的另一半像？",
+	a: "A. 能读懂你心思的灵魂伴侣",
+	b: "B. 热烈主动、爱得轰轰烈烈",
+	c: "C. 同样热爱自由、不束缚你",
+	d: "D. 温柔可靠、给你安全感"
+  },
+  {
+	q: "12. 一段感情结束后，你会？",
+	a: "A. 把回忆封存，优雅翻篇",
+	b: "B. 需要很久才能走出来，爱得深伤得深",
+	c: "C. 很快恢复，重新出发",
+	d: "D. 嘴上说没事，其实很久都放不下"
+  }
+];
+
+// ===== 12种幻想种结果 =====
+const results = {
+  "unicorn": {
+	img: "unicorn.png", name: "月光独角兽",
+	tags: ["纯洁理想主义", "宁缺毋滥", "灵魂契合至上"],
+	score: "理想指数",
+	stars: "★★★★★",
+	desc: "你在恋爱中像月光下的独角兽——纯净、高贵，绝不将就。你追求的是灵魂层面的共鸣，宁愿孤独也不愿将就一段不够契合的关系。",
+	personality: "外表温柔优雅，内心有自己坚守的标准。你不轻易动心，一旦认定一个人，便是全心全意的守护。你相信爱情应该像月光一样纯粹明亮。",
+	origin: "你可能对爱情有着近乎理想化的期待，早年经历让你明白宁缺毋滥。你把自己包裹在优雅之下，等待那个真正懂你沉默的人出现。"
+  },
+  "dragon": {
+	img: "dragon.png", name: "东方白龙",
+	tags: ["霸气护短", "占有欲强", "沉稳深情"],
+	score: "守护指数",
+	stars: "★★★★★",
+	desc: "你在恋爱中像盘踞云海的巨龙——沉稳、强大、护短到极致。一旦认定一个人，便是此生不变的守护，任何伤害TA的人都要先过你这关。",
+	personality: "外表威严内敛，不善表达却行动力惊人。你用行动代替言语，默默为对方铺好一切路。你的爱深沉如海，一旦交付便再难收回。",
+	origin: "你或许是那种一旦投入便毫无保留的人。过去的经历让你懂得，爱不是说说而已，而是用实力为对方撑起一片天。"
+  },
+  "elf": {
+	img: "elf.png", name: "森林光精灵",
+	tags: ["自由灵动", "治愈陪伴", "精神共鸣"],
+	score: "治愈指数",
+	stars: "★★★★☆",
+	desc: "你在恋爱中像晨光中的精灵——轻盈、自由、充满生命力。你带给伴侣阳光般的治愈，却始终保有自己独立的翅膀，从不依附任何人。",
+	personality: "乐观开朗，善于发现生活中的美好。你享受恋爱的甜蜜，但绝不会为了爱情失去自我。你像风一样难以捕捉，又像光一样温暖人心。",
+	origin: "你骨子里向往自由，同时也渴望真诚的连接。你相信最好的爱情是彼此成就，而不是相互束缚。"
+  },
+  "vampire": {
+	img: "vampire.png", name: "暗夜吸血鬼",
+	tags: ["炽烈危险", "爱恨交织", "一旦爱上便永恒"],
+	score: "炽烈指数",
+	stars: "★★★★★",
+	desc: "你在恋爱中像古堡里的吸血鬼——危险、迷人、爱得偏执。你渴望永恒的爱，一旦心动便不顾一切，占有欲强到让对方既着迷又战栗。",
+	personality: "外表冷酷高傲，内心却藏着炽热的情感。你不轻易动情，但一旦爱了便不顾一切。你的爱像暗夜里的烈火，炽热而危险。",
+	origin: "你或许经历过感情的背叛或失去，让你对爱情既渴望又警惕。你用高冷伪装自己，只为等待那个值得你卸下防备的人。"
+  },
+  "werewolf": {
+	img: "werewolf.png", name: "银月狼人",
+	tags: ["忠诚狂野", "护伴如命", "外表野内心柔"],
+	score: "忠诚指数",
+	stars: "★★★★★",
+	desc: "你在恋爱中像月圆之夜的狼人——外表野性难驯，内心却柔软忠诚。你对伴侣有着近乎本能的保护欲，是那种'谁动我的人我跟谁拼命'的类型。",
+	personality: "平时低调内敛，关键时刻爆发力惊人。你嘴上不饶人，行动上却把对方放在第一位。你的爱粗犷直接，不玩弯弯绕绕。",
+	origin: "你或许习惯用强硬的外壳保护柔软的内心。过往的经历让你明白，真正的爱不是甜言蜜语，而是在对方需要时挺身而出。"
+  },
+  "mermaid": {
+	img: "mermaid.png", name: "深海人鱼",
+	tags: ["深情奉献", "浪漫牺牲", "爱得深却不善表达"],
+	score: "浪漫指数",
+	stars: "★★★★☆",
+	desc: "你在恋爱中像深海的人鱼——浪漫、深情，愿意为爱付出一切甚至牺牲自己。你用歌声编织幻梦，却常常把最真实的情感藏在心底。",
+	personality: "温柔细腻，善解人意，习惯把最好的留给对方。你不善言辞，却用行动表达爱意。你的爱深沉如海，包容一切却也容易被伤害。",
+	origin: "你可能是一个习惯默默付出的人。过去的感情经历让你懂得，爱有时候意味着成全和牺牲，即使痛也不愿让对方为难。"
+  },
+  "griffin": {
+	img: "griffin.png", name: "圣光狮鹫",
+	tags: ["高贵骄傲", "只臣服于唯一", "光明坦荡"],
+	score: "高贵指数",
+	stars: "★★★★☆",
+	desc: "你在恋爱中像云顶的狮鹫——高贵、骄傲，从不轻易低头。你只对真正走进你心里的人展现柔软，一旦认定便是毫无保留的忠诚。",
+	personality: "自信从容，有自己的原则和底线。你不屑于玩暧昧游戏，认定一个人便光明正大。你的爱像正午的阳光，坦荡而温暖。",
+	origin: "你有着强烈的自尊和骄傲，不轻易向任何人低头。但你也明白，真正的强大不是孤高，而是敢于在爱人面前卸下铠甲。"
+  },
+  "kitsune": {
+	img: "kitsune.png", name: "紫月九尾狐",
+	tags: ["魅惑撩人", "暧昧高手", "真心难给"],
+	score: "魅惑指数",
+	stars: "★★★★★",
+	desc: "你在恋爱中像月下的九尾狐——魅惑、灵动、撩人于无形。你天生懂得如何吸引人心，却很少真正交出真心，是恋爱中的'高位玩家'。",
+	personality: "聪明机智，擅长营造氛围感。你喜欢享受暧昧的过程，但真正动心时反而会变得小心翼翼。你的爱像紫月下的迷雾，朦胧而迷人。",
+	origin: "你或许见过太多虚情假意，让自己变得游刃有余。你用魅惑保护自己，却在等一个能看穿你伪装、值得你收起尾巴的人。"
+  },
+  "dark-elf": {
+	img: "dark-elf.png", name: "暗黑精灵",
+	tags: ["神秘毒舌", "外冷内热", "行动宠溺"],
+	score: "神秘指数",
+	stars: "★★★★☆",
+	desc: "你在恋爱中像暗夜的精灵——神秘、毒舌，嘴上不饶人，行动上却宠溺到骨子里。你用吐槽表达关心，用行动证明爱意。",
+	personality: "嘴硬心软的典型。你习惯用冷言冷语掩饰在意，但对方一有需要，你永远是第一个冲上去的。你的爱藏在细节里，需要用心感受。",
+	origin: "你不擅长表达情感，习惯用别扭的方式关心人。过去的经历让你明白，嘴上说说很容易，真正难得的是默默守护。"
+  },
+  "phoenix": {
+	img: "phoenix.png", name: "涅槃凤凰",
+	tags: ["炽烈无畏", "伤过不回头", "要么全有要么全无"],
+	score: "炽烈指数",
+	stars: "★★★★★",
+	desc: "你在恋爱中像浴火的凤凰——炽烈、无畏，要么全有要么全无。你爱得轰轰烈烈，一旦受伤便转身离开，绝不回头。",
+	personality: "敢爱敢恨，不拖泥带水。你对待感情的态度是'给就给全部，走就走得彻底'。你的爱像烈火，能照亮一切也能焚尽一切。",
+	origin: "你可能经历过刻骨铭心的感情创伤，让你变得决绝。你不是不爱了，而是明白了——真正的爱不该让人卑微。"
+  },
+  "nightmare": {
+	img: "nightmare.png", name: "暗影梦魇",
+	tags: ["自由叛逆", "越追越跑", "被吸引就沉沦"],
+	score: "叛逆指数",
+	stars: "★★★★☆",
+	desc: "你在恋爱中像暗夜的梦魇兽——自由、叛逆、不按常理出牌。你讨厌被束缚，越是被追着跑越想逃离，但一旦被真正吸引，便会义无反顾。",
+	personality: "独立自主，不喜欢被定义。你享受恋爱中的追逐感，但讨厌被人控制。你的爱像暗夜中的火焰，危险而迷人。",
+	origin: "你骨子里向往自由，讨厌被任何人左右。你用叛逆保护自己，却在等一个不试图占有你、而是陪你一起驰骋的人。"
+  },
+  "moon-cat": {
+	img: "moon-cat.png", name: "月影灵猫",
+	tags: ["若即若离", "永远猜不透", "静谧灵动"],
+	score: "神秘指数",
+	stars: "★★★★☆",
+	desc: "你在恋爱中像月下的灵猫——忽冷忽热、若即若离，让人永远猜不透你的心思。你享受这种微妙的拉扯感，却又在关键时刻给予温暖。",
+	personality: "情绪丰富但不外露，喜欢用距离感保持神秘。你不会天天黏着对方，但在对方最需要时总会出现。你的爱像月光，忽明忽暗却始终在那里。",
+	origin: "你习惯用距离保护自己，害怕被看透也害怕失去。你用若即若离来试探对方的心意，等一个愿意陪你玩这场'猜心游戏'的人。"
+  }
+};
+
+// ===== 逻辑 =====
+// 计分：每个选项累加对应倾向，最后取最高分
+// A=纯洁系(unicorn/elf/moon-cat) B=炽烈系(dragon/vampire/phoenix/nightmare) C=自由系(kitsune/dark-elf) D=深情系(werewolf/mermaid/griffin)
+let scores = { A: 0, B: 0, C: 0, D: 0 };
+let qIndex = 0;
+
+// 动态生成题目页
+function buildQuestions() {
+  const container = document.getElementById('question-pages');
+  questions.forEach((item, i) => {
+	const pageNum = i + 2; // p2开始
+	const div = document.createElement('div');
+	div.className = 'page';
+	div.id = 'p' + pageNum;
+	div.innerHTML = `
+	  <div class="progress"><div class="progress-bar" id="bar${pageNum}"></div></div>
+	  <div class="q-title">${item.q}</div>
+	  <div class="options">
+		<div class="opt" onclick="answer('A')">${item.a}</div>
+		<div class="opt" onclick="answer('B')">${item.b}</div>
+		<div class="opt" onclick="answer('C')">${item.c}</div>
+		<div class="opt" onclick="answer('D')">${item.d}</div>
+	  </div>
+	`;
+	container.appendChild(div);
+  });
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function answer(type) {
+  scores[type]++;
+  qIndex++;
+  // 更新进度条
+  const pct = (qIndex / questions.length * 100).toFixed(0);
+  // 找当前页的进度条
+  const bars = document.querySelectorAll('.progress-bar');
+  if (bars[qIndex - 1]) bars[qIndex - 1].style.width = pct + '%';
+  if (qIndex < questions.length) {
+	showPage('p' + (qIndex + 2));
+  } else {
+	showResult();
+  }
+}
+
+function showResult() {
+  // 找最高分类别，映射到具体幻想种
+  const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]);
+  const top = sorted[0][0];
+  // 同类别内有细分，用第二偏好做微调
+  const second = sorted[1][0];
+  let key = pickResult(top, second);
+  let res = results[key];
+  document.getElementById('res-img').src = res.img;
+  document.getElementById('res-name').innerText = '『 ' + res.name + ' 』';
+  document.getElementById('res-score').innerText = res.score + '：' + (85 + Math.floor(Math.random()*15)) + '%';
+  document.getElementById('res-stars').innerText = res.stars;
+  document.getElementById('res-tags').innerHTML = res.tags.map(t => '<span class="tag">' + t + '</span>').join('');
+  document.getElementById('res-desc').innerText = res.desc;
+  document.getElementById('res-personality').innerText = res.personality;
+  document.getElementById('res-origin').innerText = res.origin;
+  showPage('result');
+}
+
+function pickResult(top, second) {
+  // 根据最高分和次高分，在12种中做出差异化选择
+  const purity = ['unicorn', 'elf', 'moon-cat'];       // 纯洁/精神系
+  const passion = ['dragon', 'vampire', 'phoenix', 'nightmare']; // 炽烈/占有系
+  const free = ['kitsune', 'dark-elf'];                  // 自由/神秘系
+  const deep = ['werewolf', 'mermaid', 'griffin'];       // 深情/守护系
+  const groups = { A: purity, B: passion, C: free, D: deep };
+  const group = groups[top];
+  // 用第二偏好在不同组别间做丰富化，避免总出同一个
+  let idx = 0;
+  if (top === 'A') idx = (second === 'B') ? 0 : (second === 'C' ? 1 : 2);
+  if (top === 'B') idx = (second === 'D') ? 0 : (second === 'A' ? 1 : (second === 'C' ? 2 : 3));
+  if (top === 'C') idx = (second === 'B') ? 0 : 1;
+  if (top === 'D') idx = (second === 'B') ? 0 : (second === 'C' ? 1 : 2);
+  return group[Math.min(idx, group.length - 1)];
+}
+
+buildQuestions();
+</script>
+</body>
+</html>
